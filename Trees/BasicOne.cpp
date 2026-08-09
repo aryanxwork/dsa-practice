@@ -48,13 +48,13 @@ Node *createTreeFromArray(vector<int> &arr)
     return root;
 }
 
-void inOrder(Node *root)
+void inOrder(Node *root, vector<int> &ans)
 {
     if (root == NULL)
         return;
-    inOrder(root->left);
-    cout << root->data << " ";
-    inOrder(root->right);
+    inOrder(root->left, ans);
+    ans.push_back(root->data);
+    inOrder(root->right, ans);
 }
 void preOrder(Node *root)
 {
@@ -93,13 +93,151 @@ int heightCalculator(Node *root)
     return maxHeight;
 }
 
+bool isSymmetricTree(Node *root)
+{
+    vector<int> ans;
+    inOrder(root, ans);
+    int n = ans.size();
+    for (int i = 0, j = n - 1; i < n / 2; i++, j--)
+    {
+        if (ans[i] != ans[j])
+        {
+            return false;
+        }
+    }
+    return true;
+}
+bool getPath(Node *root, vector<Node *> &ans, int x)
+{
+    if (!root)
+        return false;
+    ans.push_back(root);
+    if (root->data == x)
+        return true;
+    if (getPath(root->left, ans, x) || getPath(root->right, ans, x))
+        return true;
+    ans.pop_back();
+    return false;
+}
+vector<Node *> rootToNode(Node *root, int target)
+{
+    vector<Node *> ans;
+    if (!root)
+        return ans;
+    getPath(root, ans, target);
+    return ans;
+}
+Node *lowestCommonAncestor(Node *root, Node *p, Node *q)
+{
+    vector<Node *> path1 = rootToNode(root, p->data);
+    vector<Node *> path2 = rootToNode(root, q->data);
+    int i = 0;
+    Node *ans = NULL;
+    while (i < path1.size() && i < path2.size())
+    {
+        if (path1[i]->data != path2[i]->data)
+        {
+            break;
+        }
+        ans = path1[i];
+        i++;
+    }
+    return ans;
+}
+ void markParents(Node* root,
+                     unordered_map<Node*, Node*>& parent_track) {
+        
+        queue<Node*> queue;
+        queue.push(root);
+
+        while (!queue.empty()) {
+            
+            Node* current = queue.front();
+            queue.pop();
+
+            if (current->left) {
+                parent_track[current->left] = current;
+                queue.push(current->left);
+            }
+
+            if (current->right) {
+                parent_track[current->right] = current;
+                queue.push(current->right);
+            }
+        }
+    }
+     vector<int> distanceK(Node* root, Node* target, int k) {
+
+        unordered_map<Node*, Node*> parent_track;
+
+        // Node -> Parent
+        markParents(root, parent_track);
+
+        // Second BFS: go from target up to K levels
+        unordered_map<Node*, bool> visited;
+
+        queue<Node*> queue;
+        queue.push(target);
+        visited[target] = true;
+
+        int curr_level = 0;
+
+        while (!queue.empty()) {
+
+            int size = queue.size();
+
+            if (curr_level++ == k)
+                break;
+
+            for (int i = 0; i < size; i++) {
+
+                Node* current = queue.front();
+                queue.pop();
+
+                // Left
+                if (current->left &&
+                    !visited[current->left]) {
+
+                    queue.push(current->left);
+                    visited[current->left] = true;
+                }
+
+                // Right
+                if (current->right &&
+                    !visited[current->right]) {
+
+                    queue.push(current->right);
+                    visited[current->right] = true;
+                }
+
+                // Parent
+                if (parent_track[current] &&
+                    !visited[parent_track[current]]) {
+
+                    queue.push(parent_track[current]);
+                    visited[parent_track[current]] = true;
+                }
+            }
+        }
+
+        vector<int> result;
+
+        while (!queue.empty()) {
+            Node* current = queue.front();
+            queue.pop();
+
+            result.push_back(current->data);
+        }
+
+        return result;
+    }
 int main()
 {
     vector<int> arr = {1, 2, 3, 4, 5, 6, 7};
     Node *root = createTreeFromArray(arr);
 
     cout << "Inorder traversal: ";
-    inOrder(root);
+
     cout << endl;
     cout << "Preorder traversal: ";
     preOrder(root);
