@@ -56,15 +56,28 @@ void inOrder(Node *root, vector<int> &ans)
     ans.push_back(root->data);
     inOrder(root->right, ans);
 }
-void preOrder(Node *root)
+void preOrder(Node *root, vector<int> ans)
 {
     if (root == NULL)
     {
         return;
     }
-    cout << root->data << " ";
-    preOrder(root->left);
-    preOrder(root->right);
+    ans.push_back(root->data);
+    preOrder(root->left, ans);
+    preOrder(root->right, ans);
+}
+void flattenHelper(Node *root)
+{
+    vector<int> ans;
+    preOrder(root, ans);
+    int n = ans.size();
+    Node *curr = root;
+    for (int i = 1; i < n; i++)
+    {
+        curr->left = NULL;
+        curr->right = new Node(ans[i]);
+        curr = curr->right;
+    }
 }
 void postOrder(Node *root)
 {
@@ -144,93 +157,108 @@ Node *lowestCommonAncestor(Node *root, Node *p, Node *q)
     }
     return ans;
 }
- void markParents(Node* root,
-                     unordered_map<Node*, Node*>& parent_track) {
-        
-        queue<Node*> queue;
-        queue.push(root);
+void markParents(Node *root,
+                 unordered_map<Node *, Node *> &parent_track)
+{
 
-        while (!queue.empty()) {
-            
-            Node* current = queue.front();
+    queue<Node *> queue;
+    queue.push(root);
+
+    while (!queue.empty())
+    {
+
+        Node *current = queue.front();
+        queue.pop();
+
+        if (current->left)
+        {
+            parent_track[current->left] = current;
+            queue.push(current->left);
+        }
+
+        if (current->right)
+        {
+            parent_track[current->right] = current;
+            queue.push(current->right);
+        }
+    }
+}
+vector<int> distanceK(Node *root, Node *target, int k)
+{
+
+    unordered_map<Node *, Node *> parent_track;
+
+    // Node -> Parent
+    markParents(root, parent_track);
+
+    // Second BFS: go from target up to K levels
+    unordered_map<Node *, bool> visited;
+
+    queue<Node *> queue;
+    queue.push(target);
+    visited[target] = true;
+
+    int curr_level = 0;
+
+    while (!queue.empty())
+    {
+
+        int size = queue.size();
+
+        if (curr_level++ == k)
+            break;
+
+        for (int i = 0; i < size; i++)
+        {
+
+            Node *current = queue.front();
             queue.pop();
 
-            if (current->left) {
-                parent_track[current->left] = current;
+            // Left
+            if (current->left &&
+                !visited[current->left])
+            {
+
                 queue.push(current->left);
+                visited[current->left] = true;
             }
 
-            if (current->right) {
-                parent_track[current->right] = current;
+            // Right
+            if (current->right &&
+                !visited[current->right])
+            {
+
                 queue.push(current->right);
+                visited[current->right] = true;
+            }
+
+            // Parent
+            if (parent_track[current] &&
+                !visited[parent_track[current]])
+            {
+
+                queue.push(parent_track[current]);
+                visited[parent_track[current]] = true;
             }
         }
     }
-     vector<int> distanceK(Node* root, Node* target, int k) {
 
-        unordered_map<Node*, Node*> parent_track;
+    vector<int> result;
 
-        // Node -> Parent
-        markParents(root, parent_track);
+    while (!queue.empty())
+    {
+        Node *current = queue.front();
+        queue.pop();
 
-        // Second BFS: go from target up to K levels
-        unordered_map<Node*, bool> visited;
-
-        queue<Node*> queue;
-        queue.push(target);
-        visited[target] = true;
-
-        int curr_level = 0;
-
-        while (!queue.empty()) {
-
-            int size = queue.size();
-
-            if (curr_level++ == k)
-                break;
-
-            for (int i = 0; i < size; i++) {
-
-                Node* current = queue.front();
-                queue.pop();
-
-                // Left
-                if (current->left &&
-                    !visited[current->left]) {
-
-                    queue.push(current->left);
-                    visited[current->left] = true;
-                }
-
-                // Right
-                if (current->right &&
-                    !visited[current->right]) {
-
-                    queue.push(current->right);
-                    visited[current->right] = true;
-                }
-
-                // Parent
-                if (parent_track[current] &&
-                    !visited[parent_track[current]]) {
-
-                    queue.push(parent_track[current]);
-                    visited[parent_track[current]] = true;
-                }
-            }
-        }
-
-        vector<int> result;
-
-        while (!queue.empty()) {
-            Node* current = queue.front();
-            queue.pop();
-
-            result.push_back(current->data);
-        }
-
-        return result;
+        result.push_back(current->data);
     }
+
+    return result;
+}
+void flattenBT(Node *root)
+{
+    flattenHelper(root);
+}
 int main()
 {
     vector<int> arr = {1, 2, 3, 4, 5, 6, 7};
@@ -240,7 +268,7 @@ int main()
 
     cout << endl;
     cout << "Preorder traversal: ";
-    preOrder(root);
+
     cout << endl;
     cout << "Postorder traversal: ";
     postOrder(root);
