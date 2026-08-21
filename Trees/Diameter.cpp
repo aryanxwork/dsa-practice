@@ -14,6 +14,19 @@ public:
         left = right = NULL;
     }
 };
+int inorderHelper(Node* root,int &k,int &count){
+    if(!root) return 0;
+    inorderHelper(root->left,k,count);
+    count++;
+    if(count==k){
+        return root->data;
+    }
+    inorderHelper(root->right,k,count);
+}
+int kthSmallest(Node* root,int k){
+    int count=1;
+    return inorderHelper(root,k,count);
+}
 Node *createTreeFromArray(vector<int> &arr)
 {
     if (arr.empty() || arr[0] == -1)
@@ -62,6 +75,68 @@ int calculateDiameter(Node *root)
     int diameter = 0;
     heightDiameter(root, diameter);
     return diameter;
+}
+Node* inorderSuccessor(Node * root){
+    Node* curr=root->right;
+    while(curr->left){
+        curr=curr->left;
+    }
+    return curr;
+}
+Node * deleteNode(Node* root,int key){
+    if(!root) return NULL;
+    Node* prev=NULL;
+    Node* curr=root;
+    while(curr){
+        if(key==curr->data){
+            break;
+        }
+        else if(key>curr->data){
+            prev=curr;
+            curr=curr->right;
+        }
+        else{
+            prev=curr;
+            curr=curr->left;
+        }
+        if(!curr) return root;
+    }
+    if(prev->right==curr){
+        if(curr->left==NULL && curr->right==NULL){
+        prev->right=NULL;
+        
+    }
+    else if(curr->left==NULL && curr->right!=NULL){
+        prev->right=curr->right;
+    }
+    else if(curr->left!=NULL && curr->right==NULL){
+        prev->right=curr->left;
+    }
+    else{
+        Node* Successor=inorderSuccessor(curr);
+        curr->data=Successor->data;
+        deleteNode(root,Successor->data);
+    }   
+    }
+    else{
+    if(curr->left==NULL && curr->right==NULL){
+        prev->left=NULL;
+        
+    }
+    else if(curr->left==NULL && curr->right!=NULL){
+        prev->left=curr->right;
+    }
+    else if(curr->left!=NULL && curr->right==NULL){
+        prev->left=curr->left;
+    }
+    else{
+        Node* Successor=inorderSuccessor(curr);
+        curr->data=Successor->data;
+        deleteNode(root,Successor->data);
+    }
+      
+    }
+    
 }
 int main()
 {
