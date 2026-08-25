@@ -28,9 +28,17 @@ int knapsack(vector<int> &values, vector<int> &weights, int capacity)
             int noTake = dp[i - 1][j];
             int take = 0;
             if (weights[i] <= j)
-                take += dp[i][j - weights[i]] + values[i]; // infinite items
+                take += dp[i - 1][j - weights[i]] + values[i];
             dp[i][j] = max(take, noTake);
         }
     }
     return dp[n - 1][capacity];
+}
+
+int main()
+{
+    vector<int> values = {10, 20, 15, 25};
+    vector<int> weights = {2, 1, 3, 1};
+    int cap = 4;
+    cout << knapsack(values, weights, cap);
 }

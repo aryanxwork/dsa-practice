@@ -26,3 +26,27 @@ int minPathSum(vector<vector<int>> &grid)
     }
     return dp[0][0];
 }
+
+int triangleMinPathSum(vector<vector<int>> &triangle)
+{
+    int rows = triangle.size();
+
+    vector<vector<int>> dp(rows + 1, vector<int>(rows + 1, INT_MAX));
+    // dp[i][j] represents min cost to reach last row(any) from idx[i,j]
+    // therefore dp[0][0]= answer
+
+    for (int i = 0; i < rows; i++)
+    {
+        dp[rows - 1][i] = triangle[rows - 1][i]; // standing at last row indices - cost is same as triangle values
+    }
+
+    for (int i = rows - 2; i >= 0; i--)
+    {
+        for (int j = i; j >= 0; j--)
+        {
+            dp[i][j] = triangle[i][j] + min(dp[i + 1][j], dp[i + 1][j + 1]);
+        }
+    }
+
+    return dp[0][0];
+}

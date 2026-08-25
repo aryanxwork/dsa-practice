@@ -19,9 +19,10 @@ int uniquePaths(int m, int n)
     return dp[0][0]; // unique paths from start point to destination
 }
 
-class Solution {
+class Solution
+{
 public:
-    int uniquePathsWithObstacles(vector<vector<int>>& obstacleGrid)
+    int uniquePathsWithObstacles(vector<vector<int>> &obstacleGrid)
     {
         int m = obstacleGrid.size();
         int n = obstacleGrid[0].size();
